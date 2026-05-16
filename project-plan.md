@@ -24,8 +24,8 @@ Common modern stack for an e-learning platform:
 Suggested **beginners** stack: Next.js + PostgreSQL + Prisma + NextAuth.js + Stripe
 
 ## 3. Project Setup
-- [ ] Initialize version control: `git init`
-- [ ] Create `.gitignore`
+- [x] Initialize version control: `git init`
+- [x] Create `.gitignore`
 - [ ] Set up development environment (Node version, package manager)
 - [ ] Scaffold project (e.g. `npx create-next-app`)
 - [ ] Set up ESLint, Prettier, Husky pre-commit hooks
