@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Controller — E-Learning Platform</title>
+  <style>
+    @page { margin: 1.5cm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
+      line-height: 1.6;
+      padding: 40px 48px;
+    }
+    @media print {
+      body { padding: 0; }
+      .slide { page-break-after: always; padding: 40px 0; }
+      .slide:last-child { page-break-after: avoid; }
+    }
+
+    .slide { padding: 32px 0; max-width: 1000px; margin: 0 auto; }
+    .slide-header { margin-bottom: 28px; }
+    .slide-header h1 { font-size: 32px; color: #6c63ff; }
+    .slide-header h2 { font-size: 24px; color: #1a1a2e; }
+    .slide-header .subtitle { font-size: 14px; color: #888; margin-top: 4px; }
+
+    h3 { font-size: 18px; margin-bottom: 10px; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+    h3 .badge { font-size: 11px; background: #6c63ff10; color: #6c63ff; padding: 2px 10px; border-radius: 20px; font-weight: 600; }
+    h4 { font-size: 15px; margin: 12px 0 6px; color: #1a1a2e; }
+    p { color: #555; margin-bottom: 10px; font-size: 14px; }
+
+    .legend { display: flex; gap: 20px; margin: 12px 0; flex-wrap: wrap; }
+    .legend span { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot.green { background: #00c9a7; }
+    .dot.blue { background: #6c63ff; }
+    .dot.orange { background: #ff9f43; }
+    .dot.red { background: #ff6b6b; }
+    .dot.grey { background: #aaa; }
+
+    .flow-diagram {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: #f8f9fc; border: 1px solid #e2e6ee; border-radius: 10px;
+      padding: 20px 24px; margin: 16px 0;
+      font-size: 13px;
+    }
+    .flow-diagram .step {
+      background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      padding: 8px 14px; font-weight: 500;
+    }
+    .flow-diagram .arrow { color: #ccc; font-size: 18px; }
+    .flow-diagram .step.pub { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+    .flow-diagram .step.prv { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .flow-diagram .step.proxy { background: #ff9f43; color: #fff; border-color: #ff9f43; }
+
+    .code-block {
+      background: #1a1a2e; color: #e8e8e8; border-radius: 8px;
+      padding: 16px 20px; font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px; line-height: 1.5; overflow-x: auto; margin: 8px 0;
+      white-space: pre;
+    }
+    .code-block .cm { color: #6c6c8a; }
+    .code-block .kw { color: #c792ea; }
+    .code-block .fn { color: #82aaff; }
+    .code-block .str { color: #c3e88d; }
+    .code-block .type { color: #ffcb6b; }
+    .code-block .num { color: #f78c6c; }
+
+    .endpoint-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+    .endpoint-table th {
+      text-align: left; padding: 8px 12px; font-weight: 600;
+      color: #888; font-size: 11px; text-transform: uppercase;
+      letter-spacing: .5px; border-bottom: 2px solid #e2e6ee;
+    }
+    .endpoint-table td { padding: 8px 12px; border-bottom: 1px solid #f0f2f8; vertical-align: top; }
+    .endpoint-table tr:hover td { background: #f8f9fc; }
+
+    .method { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+    .method.get { background: #d4edda; color: #155724; }
+    .method.post { background: #cce5ff; color: #004085; }
+    .method.patch { background: #fff3cd; color: #856404; }
+    .method.delete { background: #f8d7da; color: #721c24; }
+
+    .model-card {
+      border: 1px solid #e2e6ee; border-radius: 10px; overflow: hidden;
+    }
+    .model-card .card-title {
+      padding: 10px 16px; font-weight: 700; font-size: 14px;
+      border-bottom: 1px solid #e2e6ee;
+    }
+    .model-card .card-body { padding: 10px 16px; font-size: 13px; }
+    .model-card .field { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #f5f6fa; }
+    .model-card .field:last-child { border: none; }
+    .model-card .field .name { font-weight: 500; color: #1a1a2e; }
+    .model-card .field .type { color: #6c63ff; font-size: 12px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+    @media print { .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; } }
+
+    .response-box {
+      background: #f0f4ff; border-left: 3px solid #6c63ff;
+      border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12px; margin: 6px 0;
+    }
+    .response-box .label { font-weight: 600; color: #6c63ff; margin-bottom: 4px; }
+
+    .file-path {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px; color: #888; margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- TITLE SLIDE -->
+<div class="slide">
+  <div class="slide-header">
+    <h1>👤 User Controller</h1>
+    <p class="subtitle">E-Learning Platform — NextAuth.js + Express + TypeScript</p>
+  </div>
+
+  <div style="margin-top:20px;">
+    <p style="font-size:15px;">Authentication & User Profile Management</p>
+    <div class="legend">
+      <span><span class="dot green"></span> Public endpoint</span>
+      <span><span class="dot blue"></span> Authenticated (NextAuth JWT)</span>
+      <span><span class="dot orange"></span> Next.js (NextAuth) — frontend</span>
+    </div>
+  </div>
+
+  <h3 style="margin-top:32px;">🏗️ Architecture Overview</h3>
+  <p>NextAuth.js runs in the Next.js frontend and handles sessions. The Express backend provides data APIs and validates NextAuth-issued JWTs.</p>
+
+  <div class="flow-diagram">
+    <span class="step proxy">NextAuth</span>
+    <span class="arrow">→</span>
+    <span class="step">Express /api/auth/login</span>
+    <span class="arrow">→</span>
+    <span class="step pub">JWT (HS256)</span>
+    <span class="arrow">→</span>
+    <span class="step proxy">NextAuth session cookie</span>
+  </div>
+
+  <div class="flow-diagram" style="margin-top:8px;">
+    <span class="step proxy">Server Action</span>
+    <span class="arrow">→</span>
+    <span class="step">Read cookie → Bearer</span>
+    <span class="arrow">→</span>
+    <span class="step">Express /api/*</span>
+    <span class="arrow">→</span>
+    <span class="step pub">JSON Response</span>
+  </div>
+</div>
+
+<!-- FILE OVERVIEW -->
+<div class="slide">
+  <div class="slide-header"><h2>📁 File Overview</h2></div>
+
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#ffd70008;">Frontend (Next.js)</div>
+      <div class="card-body">
+        <div class="field"><span class="name">src/lib/auth.ts</span><span class="type">NextAuth config + Credentials provider</span></div>
+        <div class="field"><span class="name">src/app/api/auth/[...nextauth]/route.ts</span><span class="type">Route handler (re-exports)</span></div>
+        <div class="field"><span class="name">src/lib/api.ts</span><span class="type">Express API helper (reads cookie, sends Bearer)</span></div>
+        <div class="field"><span class="name">.env.local</span><span class="type">AUTH_SECRET, BACKEND_URL</span></div>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="card-title" style="background:#6c63ff08;">Backend (Express)</div>
+      <div class="card-body">
+        <div class="field"><span class="name">src/types/index.ts</span><span class="type">Express augmentation</span></div>
+        <div class="field"><span class="name">src/utils/auth.ts</span><span class="type">bcryptjs + verifyNextAuthToken</span></div>
+        <div class="field"><span class="name">src/middleware/auth.ts</span><span class="type">authenticate + requireRole</span></div>
+        <div class="field"><span class="name">src/controllers/user.controller.ts</span><span class="type">All user route handlers</span></div>
+        <div class="field"><span class="name">src/routes/user.routes.ts</span><span class="type">Route wiring</span></div>
+        <div class="field"><span class="name">.env</span><span class="type">AUTH_SECRET, JWT_SECRET</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH FLOW -->
+<div class="slide">
+  <div class="slide-header"><h2>🔁 Authentication Flow</h2></div>
+
+  <h3>Login Flow</h3>
+  <div class="code-block"><span class="cm">// 1. User submits credentials in Next.js form</span>
+<span class="cm">// 2. NextAuth Credentials provider calls Express:</span>
+
+async authorize(credentials) {
+  const res = await fetch(`<span class="str">${BACKEND_URL}</span>/api/auth/login`, {
+    method: <span class="str">'POST'</span>,
+    body: JSON.stringify(credentials),
+  });
+  if (!res.ok) return <span class="kw">null</span>;
+  return await res.json();  <span class="cm">// → { id, name, email, role }</span>
+}
+
+<span class="cm">// 3. NextAuth creates JWT (HS256, 7d expiry)</span>
+<span class="cm">// 4. JWT stored in httpOnly cookie (authjs.session-token)</span>
+<span class="cm">// 5. JWT callback stores userId + role in token</span>
+
+jwt({ token, user }) {
+  if (user) {
+    token.sub = user.id;
+    token.role = user.role;
+  }
+  return token;
+}</div>
+
+  <h3 style="margin-top:20px;">Signup Flow</h3>
+  <div class="code-block"><span class="cm">// 1. Server Action calls Express to create user</span>
+const res = await fetch(`<span class="str">${BACKEND_URL}</span>/api/auth/signup`, {
+  method: <span class="str">'POST'</span>,
+  body: JSON.stringify({ name, email, password, role }),
+});
+<span class="cm">// Express returns user data (no JWT — NextAuth handles that)</span>
+
+<span class="cm">// 2. If signup succeeds, trigger NextAuth sign-in:</span>
+await signIn(<span class="str">'credentials'</span>, { email, password, redirect: false });
+<span class="cm">// → authorize() calls Express /api/auth/login → NextAuth creates session</span></div>
+
+  <h3 style="margin-top:20px;">API Call Flow (Frontend → Express)</h3>
+  <div class="code-block"><span class="cm">// Server Component / Server Action reads auth cookie via next/headers</span>
+<span class="cm">// and sends the raw JWT as Bearer token to Express:</span>
+
+export async function apiFetch(path, options = {}) {
+  const token = (await cookies()).get(<span class="str">'authjs.session-token'</span>)?.value;
+  const headers = new Headers(options.headers);
+  if (token) headers.set(<span class="str">'Authorization'</span>, <span class="str">`Bearer ${token}`</span>);
+  return fetch(`${BACKEND_URL}${path}`, { ...options, headers });
+}
+
+<span class="cm">// Express middleware verifies the JWT with jsonwebtoken (HS256):</span>
+const payload = jwt.verify(token, secret, { algorithms: [<span class="str">'HS256'</span>] });
+req.user = { userId: payload.sub, role: payload.role };</div>
+</div>
+
+<!-- ENDPOINT TABLE -->
+<div class="slide">
+  <div class="slide-header"><h2>📡 API Endpoints</h2></div>
+
+  <table class="endpoint-table">
+    <thead>
+      <tr><th style="width:70px;">Method</th><th style="width:200px;">Path</th><th style="width:80px;">Auth</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="method post">POST</span></td>
+        <td><code>/api/auth/signup</code></td>
+        <td><span class="dot green" style="width:8px;height:8px;"></span> Public</td>
+        <td>Create account → returns user data (called by Next.js Server Action)</td>
+      </tr>
+      <tr>
+        <td><span class="method post">POST</span></td>
+        <td><code>/api/auth/login</code></td>
+        <td><span class="dot green" style="width:8px;height:8px;"></span> Public</td>
+        <td>Verify credentials → returns user data (called by NextAuth authorize)</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/users/me</code></td>
+        <td><span class="dot blue" style="width:8px;height:8px;"></span> Auth</td>
+        <td>Get current user profile</td>
+      </tr>
+      <tr>
+        <td><span class="method patch">PATCH</span></td>
+        <td><code>/api/users/me</code></td>
+        <td><span class="dot blue" style="width:8px;height:8px;"></span> Auth</td>
+        <td>Update name / image / bio</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/users/:id</code></td>
+        <td><span class="dot green" style="width:8px;height:8px;"></span> Public</td>
+        <td>Public profile + published courses</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:16px;background:#f8f9fc;border-radius:8px;padding:12px 16px;font-size:13px;">
+    <strong>Note:</strong> The auth endpoints no longer issue JWTs themselves. NextAuth.js in the frontend handles all JWT creation and session management. Express only verifies tokens.
+  </div>
+</div>
+
+<!-- AUTH: SIGNUP + LOGIN -->
+<div class="slide">
+  <div class="slide-header"><h2>📝 Express Auth Endpoints</h2></div>
+
+  <h3>POST /api/auth/signup</h3>
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#ffd70008;">Request Body (Zod validated)</div>
+      <div class="card-body">
+        <div class="field"><span class="name">name</span><span class="type">String (1–100)</span></div>
+        <div class="field"><span class="name">email</span><span class="type">String (valid email)</span></div>
+        <div class="field"><span class="name">password</span><span class="type">String (8–128)</span></div>
+        <div class="field"><span class="name">role</span><span class="type">"STUDENT" | "INSTRUCTOR" (default STUDENT)</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="response-box">
+        <div class="label">201 Created</div>
+        <code>{ "id", "name", "email", "role", "image", "bio" }</code>
+      </div>
+      <div class="response-box" style="border-left-color:#ff6b6b;">
+        <div class="label" style="color:#ff6b6b;">409 Conflict</div>
+        <code>{ "error": "Email already in use" }</code>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;">POST /api/auth/login</h3>
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#ffd70008;">Request Body</div>
+      <div class="card-body">
+        <div class="field"><span class="name">email</span><span class="type">String (valid email)</span></div>
+        <div class="field"><span class="name">password</span><span class="type">String</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="response-box">
+        <div class="label">200 OK</div>
+        <code>{ "id", "name", "email", "role", "image", "bio" }</code>
+      </div>
+      <div class="response-box" style="border-left-color:#ff6b6b;">
+        <div class="label" style="color:#ff6b6b;">401 Unauthorized</div>
+        <code>{ "error": "Invalid email or password" }</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:12px;"><span class="cm">// Both endpoints return user data only — no JWT.</span>
+<span class="cm">// NextAuth.js in the frontend handles session creation.</span>
+
+export async function login(req, res) {
+  const { email, password } = loginSchema.parse(req.body);
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user || !(await comparePassword(password, user.passwordHash)))
+    return res.status(401).json({ error: <span class="str">'Invalid email or password'</span> });
+
+  res.json({ id: user.id, name: user.name, email: user.email,
+              role: user.role, image: user.image, bio: user.bio });
+}</div>
+</div>
+
+<!-- PROFILE ENDPOINTS -->
+<div class="slide">
+  <div class="slide-header"><h2>👤 Profile Endpoints</h2></div>
+
+  <h3>GET /api/users/me <span class="badge" style="color:#6c63ff;">Bearer Token (NextAuth JWT)</span></h3>
+  <div class="code-block">export async function getMe(req, res) {
+  <span class="cm">// req.user is populated by authenticate middleware</span>
+  <span class="cm">// which verifies the NextAuth JWT from the Bearer header</span>
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.userId },
+    select: { id, name, email, role, image, bio, emailVerified, createdAt },
+  });
+
+  if (!user) return res.status(404).json({ error: <span class="str">'User not found'</span> });
+  res.json(user);
+}</div>
+
+  <h3 style="margin-top:20px;">PATCH /api/users/me <span class="badge" style="color:#6c63ff;">Bearer Token (NextAuth JWT)</span></h3>
+  <div class="code-block">export async function updateMe(req, res) {
+  const parsed = updateProfileSchema.safeParse(req.body);
+  <span class="cm">// Only name, image, bio accepted — extra fields stripped</span>
+
+  const user = await prisma.user.update({
+    where: { id: req.user.userId },
+    data: parsed.data,
+    select: { id, name, email, role, image, bio },
+  });
+  res.json(user);
+}</div>
+
+  <h3 style="margin-top:20px;">GET /api/users/:id <span class="badge" style="color:#00c9a7;">Public</span></h3>
+  <div class="code-block">export async function getUserById(req, res) {
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    select: {
+      id, name, image, bio, role,
+      courses: {
+        where: { published: true },
+        select: { id, title, slug, image, level, category },
+        take: 50,
+      },
+    },
+  });
+
+  if (!user) return res.status(404).json({ error: <span class="str">'User not found'</span> });
+  res.json(user);
+}</div>
+</div>
+
+<!-- NEXTARCH CONFIG -->
+<div class="slide">
+  <div class="slide-header"><h2>⚙️ NextAuth.js Configuration</h2></div>
+
+  <p><code>frontend/src/lib/auth.ts</code> — central auth config used across the Next.js app.</p>
+
+  <h3>JWT Strategy</h3>
+  <div class="code-block"><span class="cm">// Custom encode/decode overrides NextAuth's default (jose + HKDF)</span>
+<span class="cm">// Uses simple HS256 with the raw secret — compatible with backend's jsonwebtoken</span>
+
+jwt: {
+  async encode({ token, secret }) {
+    return new SignJWT(token)
+      .setProtectedHeader({ alg: <span class="str">'HS256'</span> })
+      .setIssuedAt()
+      .setExpirationTime(<span class="str">'7d'</span>)
+      .sign(new TextEncoder().encode(secret));
+  },
+  async decode({ token, secret }) {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), {
+      algorithms: [<span class="str">'HS256'</span>],
+    });
+    <span class="kw">return</span> payload;
+  },
+}</div>
+
+  <h3>Backend JWT Verification</h3>
+  <div class="code-block"><span class="cm">// backend/src/middleware/auth.ts</span>
+<span class="cm">// Uses jsonwebtoken to verify NextAuth-issued JWTs:</span>
+
+export function authenticate(req, res, next) {
+  const token = req.headers.authorization?.slice(7);
+  <span class="cm">// jwt.verify with HS256 — same secret, same algorithm</span>
+  const payload = jwt.verify(token, process.env.AUTH_SECRET, {
+    algorithms: [<span class="str">'HS256'</span>],
+  });
+  req.user = { userId: payload.sub, role: payload.role };
+  next();
+}</div>
+
+  <h3>Environment Variables (shared across frontend + backend)</h3>
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#ffd70008;">Frontend (.env.local)</div>
+      <div class="card-body">
+        <div class="field"><span class="name">AUTH_SECRET</span><span class="type">Shared with backend</span></div>
+        <div class="field"><span class="name">BACKEND_URL</span><span class="type">http://localhost:4000</span></div>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="card-title" style="background:#6c63ff08;">Backend (.env)</div>
+      <div class="card-body">
+        <div class="field"><span class="name">AUTH_SECRET</span><span class="type">Must match frontend</span></div>
+        <div class="field"><span class="name">JWT_SECRET</span><span class="type">Fallback if AUTH_SECRET unset</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RELATIONSHIPS -->
+<div class="slide">
+  <div class="slide-header"><h2>🔗 Controller ↔ Schema ↔ NextAuth</h2></div>
+
+  <table class="endpoint-table">
+    <thead>
+      <tr><th>Controller</th><th>Model</th><th>Called By</th><th>Auth</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>signup</code></td>
+        <td>User (create)</td>
+        <td>Next.js Server Action</td>
+        <td>Public</td>
+      </tr>
+      <tr>
+        <td><code>login</code></td>
+        <td>User (find + compare pw)</td>
+        <td>NextAuth Credentials provider</td>
+        <td>Public</td>
+      </tr>
+      <tr>
+        <td><code>getMe</code></td>
+        <td>User (find by id)</td>
+        <td>Next.js via apiFetch()</td>
+        <td>NextAuth JWT in Bearer</td>
+      </tr>
+      <tr>
+        <td><code>updateMe</code></td>
+        <td>User (update by id)</td>
+        <td>Next.js via apiFetch()</td>
+        <td>NextAuth JWT in Bearer</td>
+      </tr>
+      <tr>
+        <td><code>getUserById</code></td>
+        <td>User + Course (find)</td>
+        <td>Any client</td>
+        <td>Public</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:16px;background:#f8f9fc;border-radius:8px;padding:16px;">
+    <p style="font-size:13px;margin:0;">
+      <strong>2 environments share AUTH_SECRET</strong> — frontend (NextAuth signs) + backend (Express verifies).<br>
+      <strong>JWT algorithm:</strong> HS256 (standard JWS) — compatible between <code>jose</code> (NextAuth) and <code>jsonwebtoken</code> (Express).<br>
+      <strong>3 Zod schemas:</strong> signupSchema, loginSchema, updateProfileSchema — validated on Express side.<br>
+      <strong>Key difference from custom JWT:</strong> Express no longer issues tokens — NextAuth handles all session lifecycle.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

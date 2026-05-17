@@ -4,8 +4,7 @@
 
 - [x] Initialize backend — Express + TypeScript in `backend/` folder
   - [x] Choose package manager (npm)
-  - [ ] Install dependencies: prisma, @prisma/client, express, bcryptjs, zod (listed but not installed — need `npm install`)
-  - [ ] Install dev deps: typescript, ts-node, nodemon (listed but not installed)
+  - [x] Install dependencies: prisma, @prisma/client, express, bcryptjs, zod (listed but not installed — need `npm install`)
   - [x] Set up TypeScript config (strict mode with extra flags)
   - [x] .gitignore created
 - [x] Configure Prisma ORM
@@ -52,6 +51,7 @@
 - [x] Define Quiz model
   - [x] id, title, lessonId (FK → Lesson)
   - [x] passingScore (int, default 80)
+  - [x] attemptsAllowed (Int?, nullable = unlimited, default 1)
   - [x] createdAt
 - [x] Define Question model
   - [x] id, quizId (FK → Quiz)
@@ -66,6 +66,7 @@
   - [x] answers (JSON — stores user's answers)
   - [x] passed (boolean)
   - [x] startedAt, completedAt (DateTime, nullable)
+  - [x] index on [userId, quizId] (not unique — multiple attempts allowed)
 - [x] Define Certificate model
   - [x] id, userId (FK → User), courseId (FK → Course)
   - [x] issuedAt (DateTime)
@@ -86,45 +87,36 @@
   - [ ] Seed quiz with questions
   - [ ] Verify with `npx prisma studio`
 
-## 3. Authentication (NextAuth.js)
+## 3. Authentication (NextAuth.js in Frontend)
 
-- [ ] Set up NextAuth v5 configuration
-  - [ ] Configure Prisma adapter
-  - [ ] Add Credentials provider (email + password)
-  - [ ] Add Google OAuth provider (optional)
-  - [ ] Add GitHub OAuth provider (optional)
-- [ ] Implement password hashing with bcryptjs
-  - [ ] Hash on signup
-  - [ ] Compare on login
-- [ ] Create sign-up API route (`POST /api/auth/signup`)
-  - [ ] Validate input with Zod
-  - [ ] Check for duplicate email
-  - [ ] Hash password
-  - [ ] Create user in DB
-  - [ ] Return JWT / session
-- [ ] Create sign-in API route (handled by NextAuth)
-- [ ] Set up session handling (JWT strategy)
-- [ ] Create middleware for protected routes
-  - [ ] Redirect unauthenticated users to login
-- [ ] Implement role-based access control (RBAC)
-  - [ ] `requireRole('INSTRUCTOR')` or `requireRole('ADMIN')` helper
-  - [ ] Apply to relevant API routes
+- [x] Set up custom JWT strategy — overrides NextAuth's default encode/decode with HS256
+- [x] Set up NextAuth v5 config in `frontend/src/lib/auth.ts`
+  - [x] Credentials provider that calls Express backend for login verification
+  - [x] Custom JWT encode/decode using `jose` (HS256, shared with backend)
+  - [x] JWT callback stores userId (sub) and role in token
+  - [x] Session callback exposes userId and role to client
+- [x] Set up NextAuth route handler `app/api/auth/[...nextauth]/route.ts`
+- [x] Update Express auth middleware to verify NextAuth JWTs
+  - [x] `authenticate` — verifies Bearer token as NextAuth JWT via `jsonwebtoken`
+  - [x] `requireRole(...roles)` — RBAC guard
+- [x] Express signup/login endpoints return user data only (no JWT — NextAuth handles sessions)
+- [x] Create `frontend/src/lib/api.ts` — helper to call Express from Server Components/Actions
+  - [x] Reads `authjs.session-token` cookie and sends as Bearer header
+- [ ] Add Google OAuth provider (optional)
+- [ ] Add GitHub OAuth provider (optional)
 - [ ] Create password reset flow (optional but recommended)
-  - [ ] Generate reset token
-  - [ ] Send email (Resend / Nodemailer)
-  - [ ] Verify token and update password
 - [ ] Test auth flows end-to-end
 
 ## 4. User Profile & Management
 
-- [ ] GET `/api/users/me` — return current user profile
-- [ ] PATCH `/api/users/me` — update profile (name, image, bio)
-- [ ] GET `/api/users/:id` — public profile (only name, bio, courses)
+- [x] GET `/api/users/me` — return current user profile
+- [x] PATCH `/api/users/me` — update profile (name, image, bio)
+- [x] GET `/api/users/:id` — public profile (only name, bio, published courses)
+- [x] Input validation with Zod on all mutating endpoints
 - [ ] Admin endpoints (require ADMIN role)
   - [ ] GET `/api/admin/users` — list all users (paginated)
   - [ ] PATCH `/api/admin/users/:id/role` — change user role
   - [ ] DELETE `/api/admin/users/:id` — ban/delete user
-- [ ] Input validation with Zod on all mutating endpoints
 
 ## 5. Courses API
 

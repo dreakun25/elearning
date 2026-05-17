@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { PrismaClient } from '@prisma/client';
+import userRoutes from './routes/user.routes';
+import './types';
 
 export const prisma = new PrismaClient();
 
@@ -17,6 +19,8 @@ app.use(express.json());
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+app.use('/api', userRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });

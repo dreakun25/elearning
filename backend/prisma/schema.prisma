@@ -113,9 +113,10 @@ model LessonProgress {
 }
 
 model Quiz {
-  id           String @id @default(uuid())
-  title        String
-  passingScore Int    @default(80)
+  id              String  @id @default(uuid())
+  title           String
+  passingScore    Int     @default(80)
+  attemptsAllowed Int?    @default(1)
 
   lessonId    String     @unique
   lesson      Lesson     @relation(fields: [lessonId], references: [id])
@@ -151,7 +152,7 @@ model QuizAttempt {
   user  User @relation(fields: [userId], references: [id])
   quiz  Quiz @relation(fields: [quizId], references: [id])
 
-  @@unique([userId, quizId])
+  @@index([userId, quizId])
 }
 
 model Certificate {
