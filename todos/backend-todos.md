@@ -2,80 +2,81 @@
 
 ## 1. Project Setup & Configuration
 
-- [ ] Initialize backend (or configure within Next.js app router)
-  - [ ] Choose package manager (npm / pnpm / yarn)
-  - [ ] Install dependencies: prisma, @prisma/client, next-auth, bcryptjs, zod, stripe
-  - [ ] Install dev deps: typescript, ts-node, prettier, eslint
-  - [ ] Set up TypeScript config (strict mode)
-- [ ] Configure Prisma ORM
-  - [ ] `npx prisma init` — generate schema.prisma
-  - [ ] Connect to PostgreSQL via DATABASE_URL in .env
-- [ ] Configure environment variables (.env / .env.local)
-  - [ ] DATABASE_URL
-  - [ ] NEXTAUTH_SECRET
-  - [ ] NEXTAUTH_URL
-  - [ ] UPLOADTHING / S3 keys (for video/images later)
+- [x] Initialize backend — Express + TypeScript in `backend/` folder
+  - [x] Choose package manager (npm)
+  - [ ] Install dependencies: prisma, @prisma/client, express, bcryptjs, zod (listed but not installed — need `npm install`)
+  - [ ] Install dev deps: typescript, ts-node, nodemon (listed but not installed)
+  - [x] Set up TypeScript config (strict mode with extra flags)
+  - [x] .gitignore created
+- [x] Configure Prisma ORM
+  - [x] `npx prisma init` — schema.prisma created
+  - [x] Connect to PostgreSQL via DATABASE_URL in .env
+- [x] Configure environment variables (.env)
+  - [x] DATABASE_URL
+  - [ ] JWT_SECRET (placeholder — needs real value)
+  - [x] PORT
+  - [x] NODE_ENV
 
 ## 2. Database Schema (Prisma)
 
-- [ ] Define User model
-  - [ ] id (uuid)
-  - [ ] name, email (unique), passwordHash
-  - [ ] role: enum (STUDENT, INSTRUCTOR, ADMIN)
-  - [ ] image (nullable)
-  - [ ] emailVerified (DateTime, nullable)
-  - [ ] createdAt, updatedAt
-- [ ] Define Course model
-  - [ ] id, title, slug (unique), description, price (Decimal)
-  - [ ] image, category, level (BEGINNER / INTERMEDIATE / ADVANCED)
-  - [ ] published (boolean, default false)
-  - [ ] instructorId (FK → User)
-  - [ ] createdAt, updatedAt
-- [ ] Define Lesson model
-  - [ ] id, title, content (rich text), videoUrl (nullable)
-  - [ ] order (int), duration (int, minutes)
-  - [ ] courseId (FK → Course)
-  - [ ] published (boolean, default false)
-  - [ ] createdAt, updatedAt
-- [ ] Define Enrollment model
-  - [ ] id, userId (FK → User), courseId (FK → Course)
-  - [ ] progress (float, default 0)
-  - [ ] enrolledAt (DateTime)
-  - [ ] unique constraint on [userId, courseId]
-- [ ] Define LessonProgress model
-  - [ ] id, enrollmentId (FK → Enrollment)
-  - [ ] lessonId (FK → Lesson)
-  - [ ] completed (boolean, default false)
-  - [ ] completedAt (DateTime, nullable)
-  - [ ] unique constraint on [enrollmentId, lessonId]
-- [ ] Define Quiz model
-  - [ ] id, title, lessonId (FK → Lesson)
-  - [ ] passingScore (int, default 80)
-  - [ ] createdAt
-- [ ] Define Question model
-  - [ ] id, quizId (FK → Quiz)
-  - [ ] text, type (MULTIPLE_CHOICE / TRUE_FALSE / FILL_BLANK)
-  - [ ] options (JSON array)
-  - [ ] correctAnswer (string)
-  - [ ] order (int)
-  - [ ] points (int, default 1)
-- [ ] Define QuizAttempt model
-  - [ ] id, userId (FK → User), quizId (FK → Quiz)
-  - [ ] score (int), maxScore (int)
-  - [ ] answers (JSON — stores user's answers)
-  - [ ] passed (boolean)
-  - [ ] startedAt, completedAt (DateTime, nullable)
-- [ ] Define Certificate model
-  - [ ] id, userId (FK → User), courseId (FK → Course)
-  - [ ] issuedAt (DateTime)
-  - [ ] certificateUrl (nullable — points to generated PDF)
-  - [ ] unique constraint on [userId, courseId]
-- [ ] Define Review model
-  - [ ] id, userId (FK → User), courseId (FK → Course)
-  - [ ] rating (int, 1–5)
-  - [ ] text (text, nullable)
-  - [ ] createdAt
-  - [ ] unique constraint on [userId, courseId]
+- [x] Define User model
+  - [x] id (uuid)
+  - [x] name, email (unique), passwordHash
+  - [x] role: enum (STUDENT, INSTRUCTOR, ADMIN)
+  - [x] image (nullable)
+  - [x] emailVerified (DateTime, nullable)
+  - [x] createdAt, updatedAt
+- [x] Define Course model
+  - [x] id, title, slug (unique), description, price (Decimal)
+  - [x] image, category, level (BEGINNER / INTERMEDIATE / ADVANCED)
+  - [x] published (boolean, default false)
+  - [x] instructorId (FK → User)
+  - [x] createdAt, updatedAt
+- [x] Define Lesson model
+  - [x] id, title, content (rich text), videoUrl (nullable)
+  - [x] order (int), duration (int, minutes)
+  - [x] courseId (FK → Course)
+  - [x] published (boolean, default false)
+  - [x] createdAt, updatedAt
+- [x] Define Enrollment model
+  - [x] id, userId (FK → User), courseId (FK → Course)
+  - [x] progress (float, default 0)
+  - [x] enrolledAt (DateTime)
+  - [x] unique constraint on [userId, courseId]
+- [x] Define LessonProgress model
+  - [x] id, enrollmentId (FK → Enrollment)
+  - [x] lessonId (FK → Lesson)
+  - [x] completed (boolean, default false)
+  - [x] completedAt (DateTime, nullable)
+  - [x] unique constraint on [enrollmentId, lessonId]
+- [x] Define Quiz model
+  - [x] id, title, lessonId (FK → Lesson)
+  - [x] passingScore (int, default 80)
+  - [x] createdAt
+- [x] Define Question model
+  - [x] id, quizId (FK → Quiz)
+  - [x] text, type (MULTIPLE_CHOICE / TRUE_FALSE / FILL_BLANK)
+  - [x] options (JSON array)
+  - [x] correctAnswer (string)
+  - [x] order (int)
+  - [x] points (int, default 1)
+- [x] Define QuizAttempt model
+  - [x] id, userId (FK → User), quizId (FK → Quiz)
+  - [x] score (int), maxScore (int)
+  - [x] answers (JSON — stores user's answers)
+  - [x] passed (boolean)
+  - [x] startedAt, completedAt (DateTime, nullable)
+- [x] Define Certificate model
+  - [x] id, userId (FK → User), courseId (FK → Course)
+  - [x] issuedAt (DateTime)
+  - [x] certificateUrl (nullable — points to generated PDF)
+  - [x] unique constraint on [userId, courseId]
+- [x] Define Review model
+  - [x] id, userId (FK → User), courseId (FK → Course)
+  - [x] rating (int, 1–5)
+  - [x] text (text, nullable)
+  - [x] createdAt
+  - [x] unique constraint on [userId, courseId]
 - [ ] Define Category / Tag models (optional for filtering)
 - [ ] Run initial migration: `npx prisma migrate dev`
 - [ ] Write seed script
@@ -295,7 +296,7 @@
 - [ ] Implement rate limiting on quiz submissions
 - [ ] Sanitize user input (XSS prevention)
 - [ ] Validate with Zod on all mutation endpoints
-- [ ] Set up CORS if backend is separate from frontend
+- [x] Set up CORS if backend is separate from frontend
 
 ## 16. Testing
 
