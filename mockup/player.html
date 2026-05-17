@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Player — Learnify</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e8ecf4; display: flex; height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 320px; background: #1a1a2e; display: flex; flex-direction: column; border-right: 1px solid #2a2a40; }
+    .sidebar-header { padding: 20px; border-bottom: 1px solid #2a2a40; }
+    .sidebar-header .logo { font-size: 20px; font-weight: 800; color: #6c63ff; }
+    .sidebar-header h3 { font-size: 14px; font-weight: 600; margin-top: 12px; color: #fff; }
+    .sidebar-header p { font-size: 12px; color: #888; }
+    .progress-bar { height: 4px; background: #2a2a40; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+    .progress-bar .fill { height: 100%; width: 35%; background: #6c63ff; border-radius: 4px; }
+    .lessons { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .lesson { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; font-size: 13px; color: #888; border-left: 3px solid transparent; }
+    .lesson:hover { background: #22223a; }
+    .lesson.active { color: #fff; background: #22223a; border-left-color: #6c63ff; }
+    .lesson.active .num { background: #6c63ff; color: #fff; }
+    .lesson.completed { color: #6c63ff; }
+    .lesson .num { width: 24px; height: 24px; border-radius: 50%; background: #2a2a40; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .lesson .check { color: #00c9a7; margin-left: auto; }
+
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid #2a2a40; }
+    .topbar h2 { font-size: 16px; font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .topbar-right .avatar { width: 32px; height: 32px; border-radius: 50%; background: #6c63ff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+    .content { flex: 1; padding: 40px 48px; overflow-y: auto; max-width: 800px; }
+    .content .tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6c63ff; margin-bottom: 8px; }
+    .content h1 { font-size: 28px; margin-bottom: 12px; color: #fff; }
+    .content p { font-size: 15px; line-height: 1.7; color: #aaa; margin-bottom: 24px; }
+
+    /* Interactive box */
+    .interactive { background: #1a1a2e; border: 1px solid #2a2a40; border-radius: 12px; padding: 28px; margin: 24px 0; }
+    .interactive h3 { font-size: 16px; color: #fff; margin-bottom: 16px; }
+    .interactive .input { width: 100%; padding: 12px 16px; background: #0f0f1a; border: 1px solid #2a2a40; border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+    .interactive .input:focus { border-color: #6c63ff; }
+    .interactive .btn { margin-top: 12px; padding: 10px 24px; background: #6c63ff; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .interactive .btn:hover { background: #5a52e0; }
+
+    .quiz-option { display: block; width: 100%; padding: 14px 18px; background: #0f0f1a; border: 1px solid #2a2a40; border-radius: 8px; color: #ccc; font-size: 14px; cursor: pointer; margin-bottom: 8px; text-align: left; }
+    .quiz-option:hover { border-color: #6c63ff; color: #fff; }
+
+    .bottom-nav { display: flex; justify-content: space-between; padding: 20px 48px; border-top: 1px solid #2a2a40; }
+    .bottom-nav .btn { padding: 10px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; }
+    .btn-secondary { background: #2a2a40; color: #ccc; }
+    .btn-secondary:hover { background: #3a3a50; }
+    .btn-primary { background: #6c63ff; color: #fff; }
+    .btn-primary:hover { background: #5a52e0; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">Learnify.</div>
+      <h3>Intro to Python</h3>
+      <p>18 lessons · 35% complete</p>
+      <div class="progress-bar"><div class="fill"></div></div>
+    </div>
+    <div class="lessons">
+      <div class="lesson completed"><span class="num">1</span> Hello, World!<span class="check">✓</span></div>
+      <div class="lesson completed"><span class="num">2</span> Variables & Types<span class="check">✓</span></div>
+      <div class="lesson completed"><span class="num">3</span> Strings & Printing<span class="check">✓</span></div>
+      <div class="lesson completed"><span class="num">4</span> Numbers & Arithmetic<span class="check">✓</span></div>
+      <div class="lesson completed"><span class="num">5</span> Booleans & Comparisons<span class="check">✓</span></div>
+      <div class="lesson active"><span class="num">6</span> Lists & Loops</div>
+      <div class="lesson"><span class="num">7</span> Dictionaries</div>
+      <div class="lesson"><span class="num">8</span> Functions</div>
+      <div class="lesson"><span class="num">9</span> Conditionals</div>
+      <div class="lesson"><span class="num">10</span> Modules</div>
+      <div class="lesson"><span class="num">11</span> File I/O</div>
+      <div class="lesson"><span class="num">12</span> Error Handling</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h2>Lists & Loops</h2>
+      <div class="topbar-right"><span style="font-size:13px;color:#888;">🔥 7 day streak</span><div class="avatar">F</div></div>
+    </div>
+    <div class="content">
+      <div class="tag">Lesson 6 of 18</div>
+      <h1>Working with Lists</h1>
+      <p>A list is a collection of items stored in a single variable. In Python, lists are ordered, mutable, and can hold items of different types. They're one of the most versatile data structures you'll use.</p>
+
+      <div class="interactive">
+        <h3>✏️ Try it yourself</h3>
+        <p style="font-size:14px;color:#aaa;margin-bottom:12px;">Create a list called <code style="background:#2a2a40;padding:2px 6px;border-radius:4px;">fruits</code> containing "apple", "banana", and "cherry"</p>
+        <input class="input" placeholder="fruits = [...]" value='fruits = ["apple", "banana", "cherry"]'>
+        <button class="btn">Run ▶</button>
+      </div>
+
+      <h3 style="color:#fff;font-size:16px;margin-top:32px;">Quick Quiz</h3>
+      <p style="font-size:14px;color:#aaa;margin-bottom:12px;">What will <code style="background:#2a2a40;padding:2px 6px;border-radius:4px;">len(fruits)</code> return?</p>
+      <button class="quiz-option">A) 2</button>
+      <button class="quiz-option" style="border-color:#6c63ff;color:#fff;">B) 3 ✓</button>
+      <button class="quiz-option">C) 4</button>
+      <button class="quiz-option">D) Error</button>
+    </div>
+    <div class="bottom-nav">
+      <button class="btn btn-secondary">← Previous</button>
+      <button class="btn btn-primary">Continue →</button>
+    </div>
+  </div>
+</body>
+</html>

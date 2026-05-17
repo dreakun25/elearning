@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructor Dashboard — Learnify</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6fa; color: #1a1a2e; }
+
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #fff; border-bottom: 1px solid #e2e6ee; }
+    .logo { font-size: 20px; font-weight: 800; color: #6c63ff; }
+    .logo span { color: #1a1a2e; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links a { text-decoration: none; color: #666; font-size: 14px; padding: 8px 16px; border-radius: 6px; }
+    .nav-links a:hover, .nav-links a.active { background: #f0f1f8; color: #6c63ff; }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-right .btn { padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13px; border: none; cursor: pointer; }
+    .btn-primary { background: #6c63ff; color: #fff; }
+    .btn-primary:hover { background: #5a52e0; }
+    .btn-outline { background: transparent; color: #6c63ff; border: 2px solid #6c63ff; padding: 6px 16px; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: #6c63ff; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 32px; }
+
+    .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .top-row h1 { font-size: 24px; }
+    .top-row p { color: #888; font-size: 14px; }
+    .top-row .btn { padding: 10px 22px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border: 1px solid #e2e6ee; border-radius: 12px; padding: 20px; }
+    .stat-card .num { font-size: 26px; font-weight: 700; }
+    .stat-card .num.purple { color: #6c63ff; }
+    .stat-card .num.green { color: #00c9a7; }
+    .stat-card .num.orange { color: #ff9f43; }
+    .stat-card .num.blue { color: #4a8cff; }
+    .stat-card .label { font-size: 13px; color: #888; margin-top: 2px; }
+    .stat-card .change { font-size: 12px; margin-top: 6px; }
+    .stat-card .change.up { color: #00c9a7; }
+    .stat-card .change.down { color: #ff6b6b; }
+
+    .row { display: flex; gap: 24px; margin-bottom: 28px; }
+    .col { flex: 1; }
+
+    .card { background: #fff; border: 1px solid #e2e6ee; border-radius: 12px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e6ee; }
+    .card-header h3 { font-size: 15px; }
+    .card-header a { font-size: 13px; color: #6c63ff; text-decoration: none; }
+    .card-body { padding: 8px 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table th { text-align: left; padding: 10px 20px; font-weight: 600; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e2e6ee; }
+    table td { padding: 12px 20px; border-bottom: 1px solid #f0f2f8; }
+    table tr:last-child td { border: none; }
+    table td .title { font-weight: 600; color: #1a1a2e; }
+    table td .status { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .status.published { background: #00c9a710; color: #00c9a7; }
+    .status.draft { background: #ff9f4310; color: #ff9f43; }
+    .stars { color: #ff9f43; font-size: 12px; }
+
+    .course-list-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid #f0f2f8; }
+    .course-list-item:last-child { border: none; }
+    .course-list-item .thumb { width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .course-list-item .info { flex: 1; }
+    .course-list-item .info h4 { font-size: 14px; margin-bottom: 2px; }
+    .course-list-item .info p { font-size: 12px; color: #888; }
+    .course-list-item .action { padding: 6px 14px; border-radius: 6px; border: 1px solid #e2e6ee; background: #fff; font-size: 12px; cursor: pointer; }
+    .course-list-item .action:hover { background: #f5f6fa; }
+
+    .chart-placeholder { display: flex; align-items: flex-end; justify-content: center; gap: 8px; height: 120px; padding: 20px; }
+    .chart-placeholder .bar { width: 32px; border-radius: 4px 4px 0 0; }
+    .chart-placeholder .bar:nth-child(1) { height: 40%; background: #6c63ff; }
+    .chart-placeholder .bar:nth-child(2) { height: 65%; background: #6c63ff; }
+    .chart-placeholder .bar:nth-child(3) { height: 50%; background: #6c63ff; }
+    .chart-placeholder .bar:nth-child(4) { height: 80%; background: #6c63ff; }
+    .chart-placeholder .bar:nth-child(5) { height: 55%; background: #6c63ff; }
+    .chart-placeholder .bar:nth-child(6) { height: 90%; background: #6c63ff; }
+    .chart-placeholder .bar:nth-child(7) { height: 70%; background: #6c63ff; }
+
+    .review-item { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #f0f2f8; }
+    .review-item:last-child { border: none; }
+    .review-item .review-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .review-item .review-body { flex: 1; }
+    .review-item .review-body .name { font-size: 13px; font-weight: 600; }
+    .review-item .review-body .text { font-size: 13px; color: #666; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Learnify<span>.</span></div>
+    <div class="nav-links">
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Courses</a>
+      <a href="#">Students</a>
+      <a href="#">Revenue</a>
+      <a href="#">Reviews</a>
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-outline">Create Course</button>
+      <div class="avatar">S</div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="top-row">
+      <div>
+        <h1>Instructor Dashboard</h1>
+        <p>Welcome back, Sarah — here's your course performance.</p>
+      </div>
+      <button class="btn btn-primary">+ New Course</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="num purple">6</div><div class="label">Published Courses</div><div class="change up">↑ 2 this month</div></div>
+      <div class="stat-card"><div class="num green">1,248</div><div class="label">Total Students</div><div class="change up">↑ 12.5%</div></div>
+      <div class="stat-card"><div class="num orange">€4,560</div><div class="label">Revenue (this month)</div><div class="change up">↑ 8.3%</div></div>
+      <div class="stat-card"><div class="num blue">4.8</div><div class="label">Avg. Rating</div><div class="change up">★ across 342 reviews</div></div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div class="card-header"><h3>📈 Revenue (Last 7 Days)</h3><a href="#">View all →</a></div>
+          <div class="chart-placeholder">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-header"><h3>🕐 Recent Reviews</h3><a href="#">View all →</a></div>
+          <div class="review-item">
+            <div class="review-avatar" style="background:#6c63ff;">M</div>
+            <div class="review-body"><div class="name">Maria K. <span class="stars">★★★★★</span></div><div class="text">Best CSS course I've ever taken. The animation module was incredibly well explained.</div></div>
+          </div>
+          <div class="review-item">
+            <div class="review-avatar" style="background:#00c9a7;">J</div>
+            <div class="review-body"><div class="name">James R. <span class="stars">★★★★☆</span></div><div class="text">Really thorough, but the last section felt rushed. Would love more practical examples.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:28px;">
+      <div class="card-header"><h3>📚 Your Courses</h3><a href="#">Manage →</a></div>
+      <table>
+        <thead><tr><th>Course</th><th>Students</th><th>Revenue</th><th>Rating</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="title">Advanced CSS & Animations</span></td>
+            <td>432</td>
+            <td>€1,728</td>
+            <td><span class="stars">★★★★★</span> 4.9</td>
+            <td><span class="status published">Published</span></td>
+          </tr>
+          <tr>
+            <td><span class="title">JavaScript: From Zero to Hero</span></td>
+            <td>318</td>
+            <td>€1,272</td>
+            <td><span class="stars">★★★★☆</span> 4.7</td>
+            <td><span class="status published">Published</span></td>
+          </tr>
+          <tr>
+            <td><span class="title">React & Next.js Bootcamp</span></td>
+            <td>285</td>
+            <td>€1,140</td>
+            <td><span class="stars">★★★★★</span> 4.8</td>
+            <td><span class="status published">Published</span></td>
+          </tr>
+          <tr>
+            <td><span class="title">Python for Data Science</span></td>
+            <td>213</td>
+            <td>€0</td>
+            <td>—</td>
+            <td><span class="status draft">Draft</span></td>
+          </tr>
+          <tr>
+            <td><span class="title">TypeScript Masterclass</span></td>
+            <td>0</td>
+            <td>€0</td>
+            <td>—</td>
+            <td><span class="status draft">Draft</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div class="card-header"><h3>👥 Recent Students</h3><a href="#">View all →</a></div>
+          <div class="course-list-item">
+            <div class="thumb" style="background:#6c63ff20;">M</div>
+            <div class="info"><h4>Maria K.</h4><p>Enrolled in Advanced CSS · 2 days ago</p></div>
+          </div>
+          <div class="course-list-item">
+            <div class="thumb" style="background:#00c9a720;">J</div>
+            <div class="info"><h4>James R.</h4><p>Enrolled in JavaScript Zero to Hero · 5 days ago</p></div>
+          </div>
+          <div class="course-list-item">
+            <div class="thumb" style="background:#ff9f4320;">A</div>
+            <div class="info"><h4>Anna L.</h4><p>Completed React & Next.js Bootcamp · 1 week ago</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-header"><h3>⚡ Quick Actions</h3></div>
+          <div class="course-list-item" style="cursor:pointer;"><span style="font-size:18px;">📝</span> <span>Edit "Advanced CSS & Animations"</span></div>
+          <div class="course-list-item" style="cursor:pointer;"><span style="font-size:18px;">📹</span> <span>Upload new video lesson</span></div>
+          <div class="course-list-item" style="cursor:pointer;"><span style="font-size:18px;">🎯</span> <span>Create a new quiz</span></div>
+          <div class="course-list-item" style="cursor:pointer;"><span style="font-size:18px;">💰</span> <span>View payout details</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
