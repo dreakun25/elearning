@@ -113,10 +113,10 @@
 - [x] PATCH `/api/users/me` — update profile (name, image, bio)
 - [x] GET `/api/users/:id` — public profile (only name, bio, published courses)
 - [x] Input validation with Zod on all mutating endpoints
-- [ ] Admin endpoints (require ADMIN role)
-  - [ ] GET `/api/admin/users` — list all users (paginated)
-  - [ ] PATCH `/api/admin/users/:id/role` — change user role
-  - [ ] DELETE `/api/admin/users/:id` — ban/delete user
+- [x] Admin endpoints (require ADMIN role)
+  - [x] GET `/api/admin/users` — list all users (paginated)
+  - [x] PATCH `/api/admin/users/:id/role` — change user role
+  - [x] DELETE `/api/admin/users/:id` — ban/delete user
 
 ## 5. Courses API
 
@@ -132,17 +132,17 @@
   - [ ] Include instructor profile
   - [ ] Include review summary (average, count)
   - [ ] Include user's enrollment status & progress (if authenticated)
-- [ ] POST `/api/courses` — create course (INSTRUCTOR only)
-  - [ ] Validate with Zod
-  - [ ] Auto-generate slug from title
-  - [ ] Set instructorId to current user
-- [ ] PATCH `/api/courses/:id` — update course (owner or ADMIN)
-  - [ ] Validate fields
-  - [ ] Re-generate slug if title changed
-- [ ] DELETE `/api/courses/:id` — delete course (owner or ADMIN)
-  - [ ] Cascade or soft-delete
-- [ ] POST `/api/courses/:id/publish` — toggle publish status
-- [ ] GET `/api/courses/:id/stats` — instructor stats (enrollment count, revenue, avg rating)
+- [x] POST `/api/courses` — create course (INSTRUCTOR only)
+  - [x] Validate with Zod
+  - [x] Auto-generate slug from title
+  - [x] Set instructorId to current user
+- [x] PATCH `/api/courses/:id` — update course (owner or ADMIN)
+  - [x] Validate fields
+  - [x] Re-generate slug if title changed
+- [x] DELETE `/api/courses/:id` — delete course (owner or ADMIN)
+  - [x] Cascade or soft-delete
+- [x] POST `/api/courses/:id/publish` — toggle publish status
+- [x] GET `/api/courses/:id/stats` — instructor stats (enrollment count, revenue, avg rating)
 
 ## 6. Lessons API
 
@@ -152,14 +152,14 @@
 - [ ] GET `/api/courses/:courseId/lessons/:lessonId` — single lesson
   - [ ] Return full content (if enrolled or instructor)
   - [ ] Return quiz data if lesson has one
-- [ ] POST `/api/courses/:courseId/lessons` — create lesson (instructor/owner)
-  - [ ] Auto-assign order (append at end)
-  - [ ] Validate
-- [ ] PATCH `/api/courses/:courseId/lessons/:lessonId` — update lesson
-- [ ] DELETE `/api/courses/:courseId/lessons/:lessonId` — delete lesson
-- [ ] PATCH `/api/courses/:courseId/lessons/reorder` — reorder lessons
-  - [ ] Accept array of lesson IDs in new order
-  - [ ] Update all at once in a transaction
+- [x] POST `/api/courses/:courseId/lessons` — create lesson (instructor/owner)
+  - [x] Auto-assign order (append at end)
+  - [x] Validate
+- [x] PATCH `/api/courses/:courseId/lessons/:lessonId` — update lesson
+- [x] DELETE `/api/courses/:courseId/lessons/:lessonId` — delete lesson
+- [x] PATCH `/api/courses/:courseId/lessons/reorder` — reorder lessons
+  - [x] Accept array of lesson IDs in new order
+  - [x] Update all at once in a transaction
 - [ ] POST `/api/courses/:courseId/lessons/:lessonId/progress` — mark lesson complete
   - [ ] Verify user is enrolled
   - [ ] Upsert LessonProgress record
@@ -176,8 +176,8 @@
   - [ ] Include course details
   - [ ] Include progress percentage
   - [ ] Filter by status (in-progress / completed)
-- [ ] GET `/api/courses/:courseId/enrollments` — list enrollments (instructor)
-  - [ ] Paginated list of enrolled students
+- [x] GET `/api/courses/:courseId/enrollments` — list enrollments (instructor)
+  - [x] Paginated list of enrolled students
 - [ ] PATCH `/api/enrollments/:id/progress` — update progress manually (if needed)
 
 ## 8. Progress Tracking
@@ -204,13 +204,13 @@
   - [ ] Record QuizAttempt
   - [ ] Return score, correct/incorrect breakdown, explanations
 - [ ] GET `/api/lessons/:lessonId/quiz/attempts` — user's past attempts
-- [ ] Admin / Instructor quiz management
-  - [ ] POST `/api/lessons/:lessonId/quiz` — create quiz
-  - [ ] PATCH `/api/quizzes/:id` — update quiz
-  - [ ] DELETE `/api/quizzes/:id` — delete quiz
-  - [ ] POST `/api/quizzes/:id/questions` — add question
-  - [ ] PATCH `/api/questions/:id` — update question
-  - [ ] DELETE `/api/questions/:id` — delete question
+- [x] Instructor quiz management (INSTRUCTOR/ADMIN)
+  - [x] POST `/api/lessons/:lessonId/quiz` — create quiz
+  - [x] PATCH `/api/quizzes/:id` — update quiz
+  - [x] DELETE `/api/quizzes/:id` — delete quiz
+  - [x] POST `/api/quizzes/:id/questions` — add question
+  - [x] PATCH `/api/questions/:id` — update question
+  - [x] DELETE `/api/questions/:id` — delete question
 
 ## 10. Certificates
 
@@ -261,15 +261,14 @@
 
 ## 13. Admin Endpoints
 
-- [ ] GET `/api/admin/stats` — platform-wide stats
-  - [ ] Total users (split by role)
-  - [ ] Total courses (published vs draft)
-  - [ ] Total enrollments
-  - [ ] Revenue (if applicable)
-- [ ] GET `/api/admin/courses` — list all courses (including drafts)
-- [ ] PATCH `/api/admin/courses/:id/feature` — feature/unfeature course
-- [ ] GET `/api/admin/reports/enrollments` — enrollment report (CSV export)
-- [ ] GET `/api/admin/reports/revenue` — revenue report (CSV export)
+- [x] GET `/api/admin/stats` — platform-wide stats
+  - [x] Total users (split by role)
+  - [x] Total courses (published vs draft)
+  - [x] Total enrollments
+- [x] GET `/api/admin/courses` — list all courses (including drafts)
+- [x] PATCH `/api/admin/courses/:id/feature` — feature/unfeature course
+- [x] GET `/api/admin/reports/enrollments` — enrollment report (CSV export)
+- [x] GET `/api/admin/reports/revenue` — revenue report (CSV export)
 
 ## 14. Search & Filtering
 

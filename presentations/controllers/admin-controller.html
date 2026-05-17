@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Controller — E-Learning Platform</title>
+  <style>
+    @page { margin: 1.5cm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
+      line-height: 1.6;
+      padding: 40px 48px;
+    }
+    @media print {
+      body { padding: 0; }
+      .slide { page-break-after: always; padding: 40px 0; }
+      .slide:last-child { page-break-after: avoid; }
+    }
+
+    .slide { padding: 32px 0; max-width: 1000px; margin: 0 auto; }
+    .slide-header { margin-bottom: 28px; }
+    .slide-header h1 { font-size: 32px; color: #6c63ff; }
+    .slide-header h2 { font-size: 24px; color: #1a1a2e; }
+    .slide-header .subtitle { font-size: 14px; color: #888; margin-top: 4px; }
+
+    h3 { font-size: 18px; margin-bottom: 10px; color: #1a1a2e; display: flex; align-items: center; gap: 8px; }
+    h3 .badge { font-size: 11px; background: #6c63ff10; color: #6c63ff; padding: 2px 10px; border-radius: 20px; font-weight: 600; }
+    h4 { font-size: 15px; margin: 12px 0 6px; color: #1a1a2e; }
+    p { color: #555; margin-bottom: 10px; font-size: 14px; }
+
+    .legend { display: flex; gap: 20px; margin: 12px 0; flex-wrap: wrap; }
+    .legend span { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot.green { background: #00c9a7; }
+    .dot.blue { background: #6c63ff; }
+    .dot.orange { background: #ff9f43; }
+    .dot.red { background: #ff6b6b; }
+    .dot.grey { background: #aaa; }
+    .dot.purple { background: #9b59b6; }
+
+    .flow-diagram {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: #f8f9fc; border: 1px solid #e2e6ee; border-radius: 10px;
+      padding: 20px 24px; margin: 16px 0;
+      font-size: 13px;
+    }
+    .flow-diagram .step {
+      background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      padding: 8px 14px; font-weight: 500;
+    }
+    .flow-diagram .arrow { color: #ccc; font-size: 18px; }
+    .flow-diagram .step.admin { background: #9b59b6; color: #fff; border-color: #9b59b6; }
+    .flow-diagram .step.pub { background: #6c63ff; color: #fff; border-color: #6c63ff; }
+    .flow-diagram .step.proxy { background: #ff9f43; color: #fff; border-color: #ff9f43; }
+
+    .code-block {
+      background: #1a1a2e; color: #e8e8e8; border-radius: 8px;
+      padding: 16px 20px; font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px; line-height: 1.5; overflow-x: auto; margin: 8px 0;
+      white-space: pre;
+    }
+    .code-block .cm { color: #6c6c8a; }
+    .code-block .kw { color: #c792ea; }
+    .code-block .fn { color: #82aaff; }
+    .code-block .str { color: #c3e88d; }
+    .code-block .type { color: #ffcb6b; }
+    .code-block .num { color: #f78c6c; }
+
+    .endpoint-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+    .endpoint-table th {
+      text-align: left; padding: 8px 12px; font-weight: 600;
+      color: #888; font-size: 11px; text-transform: uppercase;
+      letter-spacing: .5px; border-bottom: 2px solid #e2e6ee;
+    }
+    .endpoint-table td { padding: 8px 12px; border-bottom: 1px solid #f0f2f8; vertical-align: top; }
+    .endpoint-table tr:hover td { background: #f8f9fc; }
+
+    .method { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }
+    .method.get { background: #d4edda; color: #155724; }
+    .method.post { background: #cce5ff; color: #004085; }
+    .method.patch { background: #fff3cd; color: #856404; }
+    .method.delete { background: #f8d7da; color: #721c24; }
+
+    .model-card {
+      border: 1px solid #e2e6ee; border-radius: 10px; overflow: hidden;
+    }
+    .model-card .card-title {
+      padding: 10px 16px; font-weight: 700; font-size: 14px;
+      border-bottom: 1px solid #e2e6ee;
+    }
+    .model-card .card-body { padding: 10px 16px; font-size: 13px; }
+    .model-card .field { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #f5f6fa; }
+    .model-card .field:last-child { border: none; }
+    .model-card .field .name { font-weight: 500; color: #1a1a2e; }
+    .model-card .field .type { color: #6c63ff; font-size: 12px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+    @media print { .grid-2, .grid-3 { grid-template-columns: 1fr 1fr; } }
+
+    .response-box {
+      background: #f0f4ff; border-left: 3px solid #6c63ff;
+      border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12px; margin: 6px 0;
+    }
+    .response-box .label { font-weight: 600; color: #6c63ff; margin-bottom: 4px; }
+
+    .file-path {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px; color: #888; margin-bottom: 4px;
+    }
+
+    .warning-box {
+      background: #fff8e1; border-left: 3px solid #ff9f43;
+      border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; margin: 8px 0;
+    }
+    .warning-box .label { font-weight: 600; color: #e67e22; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- TITLE SLIDE -->
+<div class="slide">
+  <div class="slide-header">
+    <h1>🛡️ Admin Controller</h1>
+    <p class="subtitle">E-Learning Platform — Express + TypeScript + Prisma</p>
+  </div>
+
+  <div style="margin-top:20px;">
+    <p style="font-size:15px;">Platform Administration &amp; Management</p>
+    <div class="legend">
+      <span><span class="dot purple"></span> Admin only (ADMIN role required)</span>
+    </div>
+  </div>
+
+  <h3 style="margin-top:32px;">🏗️ Architecture Overview</h3>
+  <p>All admin endpoints sit behind a middleware chain of <code>authenticate</code> → <code>requireRole('ADMIN')</code>. Only users with the ADMIN role can access any endpoint in this controller.</p>
+
+  <div class="flow-diagram">
+    <span class="step proxy">Request</span>
+    <span class="arrow">→</span>
+    <span class="step">authenticate</span>
+    <span class="arrow">→</span>
+    <span class="step admin">requireRole('ADMIN')</span>
+    <span class="arrow">→</span>
+    <span class="step pub">Admin Controller</span>
+    <span class="arrow">→</span>
+    <span class="step proxy">JSON / CSV</span>
+  </div>
+</div>
+
+<!-- FILE OVERVIEW -->
+<div class="slide">
+  <div class="slide-header"><h2>📁 File Overview</h2></div>
+
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#9b59b608;">Controller</div>
+      <div class="card-body">
+        <div class="field"><span class="name">src/controllers/admin.controller.ts</span><span class="type">8 route handlers</span></div>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="card-title" style="background:#6c63ff08;">Routes</div>
+      <div class="card-body">
+        <div class="field"><span class="name">src/routes/admin.routes.ts</span><span class="type">Wiring + RBAC middleware</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warning-box" style="margin-top:16px;">
+    <div class="label">⚠️ Security Note</div>
+    Routes use <code>router.use(authenticate, requireRole('ADMIN'))</code> so the guard applies to every route — no risk of exposing an admin endpoint without auth.
+  </div>
+</div>
+
+<!-- ENDPOINT TABLE -->
+<div class="slide">
+  <div class="slide-header"><h2>📡 API Endpoints</h2></div>
+
+  <div class="legend">
+    <span><span class="dot purple"></span> ADMIN role required</span>
+  </div>
+
+  <table class="endpoint-table">
+    <thead>
+      <tr><th style="width:70px;">Method</th><th style="width:260px;">Path</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/admin/users?page=&amp;limit=&amp;search=&amp;role=</code></td>
+        <td>Paginated user list with search &amp; role filter</td>
+      </tr>
+      <tr>
+        <td><span class="method patch">PATCH</span></td>
+        <td><code>/api/admin/users/:id/role</code></td>
+        <td>Change user role (prevents self-demotion)</td>
+      </tr>
+      <tr>
+        <td><span class="method delete">DELETE</span></td>
+        <td><code>/api/admin/users/:id</code></td>
+        <td>Delete user (prevents self-deletion)</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/admin/stats</code></td>
+        <td>Platform-wide statistics</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/admin/courses?page=&amp;limit=&amp;search=</code></td>
+        <td>All courses (including drafts) with lesson/enrollment/review counts</td>
+      </tr>
+      <tr>
+        <td><span class="method patch">PATCH</span></td>
+        <td><code>/api/admin/courses/:id/feature</code></td>
+        <td>Toggle featured flag on a course</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/admin/reports/enrollments</code></td>
+        <td>CSV download — all enrollments</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><code>/api/admin/reports/revenue</code></td>
+        <td>CSV download — course enrollment revenue data</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- USER MANAGEMENT -->
+<div class="slide">
+  <div class="slide-header"><h2>👥 User Management</h2></div>
+
+  <h3>GET /api/admin/users <span class="badge">Paginated</span></h3>
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#ffd70008;">Query Parameters</div>
+      <div class="card-body">
+        <div class="field"><span class="name">page</span><span class="type">number (default 1)</span></div>
+        <div class="field"><span class="name">limit</span><span class="type">number 1–100 (default 20)</span></div>
+        <div class="field"><span class="name">search</span><span class="type">string — matches name or email (case-insensitive)</span></div>
+        <div class="field"><span class="name">role</span><span class="type">"STUDENT" | "INSTRUCTOR" | "ADMIN"</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="response-box">
+        <div class="label">200 OK</div>
+        <code>{ "users": [...], "pagination": { "page", "limit", "total", "totalPages" } }</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:8px;"><span class="cm">// Paginated with case-insensitive search across name + email</span>
+const where: Prisma.UserWhereInput = {};
+if (search) {
+  where.OR = [
+    { name: { contains: search, mode: <span class="str">'insensitive'</span> } },
+    { email: { contains: search, mode: <span class="str">'insensitive'</span> } },
+  ];
+}
+if (role) where.role = role;
+
+const [users, total] = await Promise.all([
+  prisma.user.findMany({ where, skip, take: limit, orderBy: { createdAt: <span class="str">'desc'</span> } }),
+  prisma.user.count({ where }),
+]);</div>
+
+  <h3 style="margin-top:20px;">PATCH /api/admin/users/:id/role</h3>
+  <div class="grid-2">
+    <div class="model-card">
+      <div class="card-title" style="background:#ffd70008;">Request Body (Zod validated)</div>
+      <div class="card-body">
+        <div class="field"><span class="name">role</span><span class="type">"STUDENT" | "INSTRUCTOR" | "ADMIN"</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="response-box">
+        <div class="label">200 OK</div>
+        <code>{ "id", "name", "email", "role", "image", "bio", "updatedAt" }</code>
+      </div>
+      <div class="response-box" style="border-left-color:#ff6b6b;">
+        <div class="label" style="color:#ff6b6b;">400 Bad Request</div>
+        <code>{ "error": "Cannot change your own role" }</code>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;">DELETE /api/admin/users/:id</h3>
+  <div>
+    <div class="response-box">
+      <div class="label">204 No Content</div>
+      <code>— empty body —</code>
+    </div>
+    <div class="response-box" style="border-left-color:#ff6b6b;">
+      <div class="label" style="color:#ff6b6b;">400 Bad Request</div>
+      <code>{ "error": "Cannot delete your own account" }</code>
+    </div>
+    <div class="response-box" style="border-left-color:#ff6b6b;">
+      <div class="label" style="color:#ff6b6b;">404 Not Found</div>
+      <code>{ "error": "User not found" }</code>
+    </div>
+  </div>
+</div>
+
+<!-- STATS & COURSES -->
+<div class="slide">
+  <div class="slide-header"><h2>📊 Stats &amp; Course Management</h2></div>
+
+  <h3>GET /api/admin/stats</h3>
+  <p>Returns platform-wide aggregates computed via three parallel Prisma queries.</p>
+
+  <div class="code-block"><span class="cm">// Three queries run in parallel with Promise.all</span>
+const [usersByRole, coursesByStatus, totalEnrollments] = await Promise.all([
+  prisma.user.groupBy({ by: [<span class="str">'role'</span>], _count: { id: <span class="kw">true</span> } }),
+  prisma.course.groupBy({ by: [<span class="str">'published'</span>], _count: { id: <span class="kw">true</span> } }),
+  prisma.enrollment.count(),
+]);</div>
+
+  <div class="response-box" style="margin-top:8px;">
+    <div class="label">200 OK</div>
+    <pre style="font-size:12px;margin:4px 0 0;">{
+  "users": { "total": 42, "byRole": { "STUDENT": 30, "INSTRUCTOR": 10, "ADMIN": 2 } },
+  "courses": { "total": 15, "published": 10, "drafts": 5 },
+  "enrollments": { "total": 128 }
+}</pre>
+  </div>
+
+  <h3 style="margin-top:24px;">GET /api/admin/courses <span class="badge">Paginated</span></h3>
+  <p>Unlike the public courses endpoint, this returns <strong>all</strong> courses including drafts and unpublished. Includes instructor info and counts of lessons, enrollments, and reviews.</p>
+
+  <div class="code-block"><span class="cm">// Includes instructor details + relation counts</span>
+const courses = await prisma.course.findMany({
+  where, skip, take: limit, orderBy: { createdAt: <span class="str">'desc'</span> },
+  include: {
+    instructor: { select: { id: <span class="kw">true</span>, name: <span class="kw">true</span>, email: <span class="kw">true</span> } },
+    _count: { select: { lessons: <span class="kw">true</span>, enrollments: <span class="kw">true</span>, reviews: <span class="kw">true</span> } },
+  },
+});</div>
+
+  <h3 style="margin-top:24px;">PATCH /api/admin/courses/:id/feature</h3>
+  <p>Toggles a course's <code>featured</code> boolean. Frontend can use this to surface promoted courses on the landing page.</p>
+
+  <div class="code-block"><span class="cm">// Toggle — no request body needed</span>
+const course = await prisma.course.findUnique({ where: { id } });
+<span class="kw">if</span> (!course) <span class="kw">return</span> res.status(404).json({ error: <span class="str">'Course not found'</span> });
+
+const updated = await prisma.course.update({
+  where: { id },
+  data: { featured: !course.featured },
+  select: { id, title, slug, featured, published },
+});</div>
+</div>
+
+<!-- CSV REPORTS -->
+<div class="slide">
+  <div class="slide-header"><h2>📄 CSV Reports</h2></div>
+
+  <p>Both report endpoints return <code>Content-Type: text/csv</code> with a <code>Content-Disposition: attachment</code> header — the browser will download the file automatically.</p>
+
+  <h3>GET /api/admin/reports/enrollments</h3>
+  <div class="code-block"><span class="cm">// Columns: User ID, User Name, User Email, Course ID,</span>
+<span class="cm">//           Course Title, Course Slug, Price, Enrolled At, Progress</span>
+
+res.setHeader(<span class="str">'Content-Type'</span>, <span class="str">'text/csv'</span>);
+res.setHeader(<span class="str">'Content-Disposition'</span>, <span class="str">'attachment; filename="enrollments.csv"'</span>);
+res.send([header, ...rows].join(<span class="str">'\n'</span>));</div>
+
+  <div class="model-card" style="margin-top:8px;">
+    <div class="card-title" style="background:#ffd70008;">Sample CSV Output</div>
+    <div class="card-body" style="font-family:monospace;font-size:12px;">
+User ID,User Name,User Email,Course ID,Course Title,Price,Enrolled At,Progress<br>
+abc-123,John Doe,john@test.com,def-456,React 101,49.99,2025-01-15T10:00:00.000Z,0.5
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;">GET /api/admin/reports/revenue</h3>
+  <div class="code-block"><span class="cm">// Columns: Course ID, Course Title, Price,</span>
+<span class="cm">//           Enrolled User ID, User Name, User Email, Enrolled At</span>
+
+<span class="cm">// Each row represents one enrollment + course price.</span>
+<span class="cm">// Revenue total can be calculated by summing Price in any spreadsheet tool.</span></div>
+
+  <div class="warning-box" style="margin-top:12px;">
+    <div class="label">📌 Note</div>
+    These reports are generated on-demand from live data — no caching. For large datasets, consider adding pagination or a date range filter in the future.
+  </div>
+</div>
+
+<!-- CONTROLLER CODE WALKTHROUGH -->
+<div class="slide">
+  <div class="slide-header"><h2>🧩 Controller Patterns</h2></div>
+
+  <h3>Zod Validation</h3>
+  <p>All mutation endpoints use <code>safeParse</code> for input validation, consistent with the existing user controller pattern.</p>
+  <div class="code-block"><span class="cm">// Standard validation pattern used across all admin endpoints</span>
+const parsed = updateRoleSchema.safeParse(req.body);
+<span class="kw">if</span> (!parsed.success) {
+  <span class="kw">return</span> res.status(400).json({
+    error: <span class="str">'Validation failed'</span>,
+    details: parsed.error.flatten().fieldErrors,
+  });
+}</div>
+
+  <h3>Self-Operation Guards</h3>
+  <p>Admins cannot demote or delete themselves — prevents accidental lockout.</p>
+  <div class="code-block"><span class="cm">// Guard in updateUserRole</span>
+<span class="kw">if</span> (id === req.user.userId) {
+  <span class="kw">return</span> res.status(400).json({ error: <span class="str">'Cannot change your own role'</span> });
+}
+
+<span class="cm">// Guard in deleteUser</span>
+<span class="kw">if</span> (id === req.user.userId) {
+  <span class="kw">return</span> res.status(400).json({ error: <span class="str">'Cannot delete your own account'</span> });
+}</div>
+
+  <h3>Parallel Queries</h3>
+  <p>Where possible, independent Prisma queries run in parallel via <code>Promise.all</code> for performance.</p>
+  <div class="code-block"><span class="cm">// Paginated list + total count — runs simultaneously</span>
+const [users, total] = await Promise.all([
+  prisma.user.findMany({ ... }),
+  prisma.user.count({ where }),
+]);
+
+<span class="cm">// Stats endpoint — three aggregates in parallel</span>
+const [usersByRole, coursesByStatus, totalEnrollments] = await Promise.all([
+  prisma.user.groupBy({ ... }),
+  prisma.course.groupBy({ ... }),
+  prisma.enrollment.count(),
+]);</div>
+</div>
+
+<!-- RELATIONSHIPS -->
+<div class="slide">
+  <div class="slide-header"><h2>🔗 Controller ↔ Schema ↔ Middleware</h2></div>
+
+  <table class="endpoint-table">
+    <thead>
+      <tr><th>Controller</th><th>Model(s)</th><th>Middleware</th><th>Output</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>getUsers</code></td>
+        <td>User (findMany + count)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>JSON (paginated)</td>
+      </tr>
+      <tr>
+        <td><code>updateUserRole</code></td>
+        <td>User (findUnique + update)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>JSON</td>
+      </tr>
+      <tr>
+        <td><code>deleteUser</code></td>
+        <td>User (findUnique + delete)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>204 No Content</td>
+      </tr>
+      <tr>
+        <td><code>getStats</code></td>
+        <td>User (groupBy), Course (groupBy), Enrollment (count)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>JSON</td>
+      </tr>
+      <tr>
+        <td><code>getCourses</code></td>
+        <td>Course (findMany + count, include instructor + _count)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>JSON (paginated)</td>
+      </tr>
+      <tr>
+        <td><code>featureCourse</code></td>
+        <td>Course (findUnique + update)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>JSON</td>
+      </tr>
+      <tr>
+        <td><code>getEnrollmentsReport</code></td>
+        <td>Enrollment (findMany, include user + course)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>CSV download</td>
+      </tr>
+      <tr>
+        <td><code>getRevenueReport</code></td>
+        <td>Enrollment (findMany, include course + user)</td>
+        <td>authenticate, requireRole('ADMIN')</td>
+        <td>CSV download</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:16px;background:#f8f9fc;border-radius:8px;padding:16px;">
+    <p style="font-size:13px;margin:0;">
+      <strong>2 Zod schemas:</strong> <code>updateRoleSchema</code> (role enum), <code>paginationSchema</code> (page/limit/search/role) — reused across getUsers and getCourses.<br>
+      <strong>1 middleware chain:</strong> <code>authenticate</code> → <code>requireRole('ADMIN')</code> applied at the router level — all 8 endpoints inherit it.<br>
+      <strong>2 self-operation guards:</strong> prevent admin from demoting or deleting themselves.<br>
+      <strong>2 CSV reports:</strong> enrollments (with progress) and revenue (with price) — served as downloadable files.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
