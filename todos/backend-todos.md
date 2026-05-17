@@ -1,0 +1,334 @@
+# Backend TODOs (Excluding Payments)
+
+## 1. Project Setup & Configuration
+
+- [ ] Initialize backend (or configure within Next.js app router)
+  - [ ] Choose package manager (npm / pnpm / yarn)
+  - [ ] Install dependencies: prisma, @prisma/client, next-auth, bcryptjs, zod, stripe
+  - [ ] Install dev deps: typescript, ts-node, prettier, eslint
+  - [ ] Set up TypeScript config (strict mode)
+- [ ] Configure Prisma ORM
+  - [ ] `npx prisma init` — generate schema.prisma
+  - [ ] Connect to PostgreSQL via DATABASE_URL in .env
+- [ ] Configure environment variables (.env / .env.local)
+  - [ ] DATABASE_URL
+  - [ ] NEXTAUTH_SECRET
+  - [ ] NEXTAUTH_URL
+  - [ ] UPLOADTHING / S3 keys (for video/images later)
+
+## 2. Database Schema (Prisma)
+
+- [ ] Define User model
+  - [ ] id (uuid)
+  - [ ] name, email (unique), passwordHash
+  - [ ] role: enum (STUDENT, INSTRUCTOR, ADMIN)
+  - [ ] image (nullable)
+  - [ ] emailVerified (DateTime, nullable)
+  - [ ] createdAt, updatedAt
+- [ ] Define Course model
+  - [ ] id, title, slug (unique), description, price (Decimal)
+  - [ ] image, category, level (BEGINNER / INTERMEDIATE / ADVANCED)
+  - [ ] published (boolean, default false)
+  - [ ] instructorId (FK → User)
+  - [ ] createdAt, updatedAt
+- [ ] Define Lesson model
+  - [ ] id, title, content (rich text), videoUrl (nullable)
+  - [ ] order (int), duration (int, minutes)
+  - [ ] courseId (FK → Course)
+  - [ ] published (boolean, default false)
+  - [ ] createdAt, updatedAt
+- [ ] Define Enrollment model
+  - [ ] id, userId (FK → User), courseId (FK → Course)
+  - [ ] progress (float, default 0)
+  - [ ] enrolledAt (DateTime)
+  - [ ] unique constraint on [userId, courseId]
+- [ ] Define LessonProgress model
+  - [ ] id, enrollmentId (FK → Enrollment)
+  - [ ] lessonId (FK → Lesson)
+  - [ ] completed (boolean, default false)
+  - [ ] completedAt (DateTime, nullable)
+  - [ ] unique constraint on [enrollmentId, lessonId]
+- [ ] Define Quiz model
+  - [ ] id, title, lessonId (FK → Lesson)
+  - [ ] passingScore (int, default 80)
+  - [ ] createdAt
+- [ ] Define Question model
+  - [ ] id, quizId (FK → Quiz)
+  - [ ] text, type (MULTIPLE_CHOICE / TRUE_FALSE / FILL_BLANK)
+  - [ ] options (JSON array)
+  - [ ] correctAnswer (string)
+  - [ ] order (int)
+  - [ ] points (int, default 1)
+- [ ] Define QuizAttempt model
+  - [ ] id, userId (FK → User), quizId (FK → Quiz)
+  - [ ] score (int), maxScore (int)
+  - [ ] answers (JSON — stores user's answers)
+  - [ ] passed (boolean)
+  - [ ] startedAt, completedAt (DateTime, nullable)
+- [ ] Define Certificate model
+  - [ ] id, userId (FK → User), courseId (FK → Course)
+  - [ ] issuedAt (DateTime)
+  - [ ] certificateUrl (nullable — points to generated PDF)
+  - [ ] unique constraint on [userId, courseId]
+- [ ] Define Review model
+  - [ ] id, userId (FK → User), courseId (FK → Course)
+  - [ ] rating (int, 1–5)
+  - [ ] text (text, nullable)
+  - [ ] createdAt
+  - [ ] unique constraint on [userId, courseId]
+- [ ] Define Category / Tag models (optional for filtering)
+- [ ] Run initial migration: `npx prisma migrate dev`
+- [ ] Write seed script
+  - [ ] Seed admin user
+  - [ ] Seed instructor user
+  - [ ] Seed 2–3 sample courses with lessons
+  - [ ] Seed quiz with questions
+  - [ ] Verify with `npx prisma studio`
+
+## 3. Authentication (NextAuth.js)
+
+- [ ] Set up NextAuth v5 configuration
+  - [ ] Configure Prisma adapter
+  - [ ] Add Credentials provider (email + password)
+  - [ ] Add Google OAuth provider (optional)
+  - [ ] Add GitHub OAuth provider (optional)
+- [ ] Implement password hashing with bcryptjs
+  - [ ] Hash on signup
+  - [ ] Compare on login
+- [ ] Create sign-up API route (`POST /api/auth/signup`)
+  - [ ] Validate input with Zod
+  - [ ] Check for duplicate email
+  - [ ] Hash password
+  - [ ] Create user in DB
+  - [ ] Return JWT / session
+- [ ] Create sign-in API route (handled by NextAuth)
+- [ ] Set up session handling (JWT strategy)
+- [ ] Create middleware for protected routes
+  - [ ] Redirect unauthenticated users to login
+- [ ] Implement role-based access control (RBAC)
+  - [ ] `requireRole('INSTRUCTOR')` or `requireRole('ADMIN')` helper
+  - [ ] Apply to relevant API routes
+- [ ] Create password reset flow (optional but recommended)
+  - [ ] Generate reset token
+  - [ ] Send email (Resend / Nodemailer)
+  - [ ] Verify token and update password
+- [ ] Test auth flows end-to-end
+
+## 4. User Profile & Management
+
+- [ ] GET `/api/users/me` — return current user profile
+- [ ] PATCH `/api/users/me` — update profile (name, image, bio)
+- [ ] GET `/api/users/:id` — public profile (only name, bio, courses)
+- [ ] Admin endpoints (require ADMIN role)
+  - [ ] GET `/api/admin/users` — list all users (paginated)
+  - [ ] PATCH `/api/admin/users/:id/role` — change user role
+  - [ ] DELETE `/api/admin/users/:id` — ban/delete user
+- [ ] Input validation with Zod on all mutating endpoints
+
+## 5. Courses API
+
+- [ ] GET `/api/courses` — list published courses
+  - [ ] Pagination (cursor or offset-based)
+  - [ ] Search by title (full-text or ILIKE)
+  - [ ] Filter by category, level, price range
+  - [ ] Sort by newest, popular (enrollment count), rating
+  - [ ] Include instructor name & avatar
+  - [ ] Include average rating
+- [ ] GET `/api/courses/:slug` — course detail
+  - [ ] Include lessons (ordered, published only for non-instructors)
+  - [ ] Include instructor profile
+  - [ ] Include review summary (average, count)
+  - [ ] Include user's enrollment status & progress (if authenticated)
+- [ ] POST `/api/courses` — create course (INSTRUCTOR only)
+  - [ ] Validate with Zod
+  - [ ] Auto-generate slug from title
+  - [ ] Set instructorId to current user
+- [ ] PATCH `/api/courses/:id` — update course (owner or ADMIN)
+  - [ ] Validate fields
+  - [ ] Re-generate slug if title changed
+- [ ] DELETE `/api/courses/:id` — delete course (owner or ADMIN)
+  - [ ] Cascade or soft-delete
+- [ ] POST `/api/courses/:id/publish` — toggle publish status
+- [ ] GET `/api/courses/:id/stats` — instructor stats (enrollment count, revenue, avg rating)
+
+## 6. Lessons API
+
+- [ ] GET `/api/courses/:courseId/lessons` — list lessons
+  - [ ] Ordered by `order` field
+  - [ ] Include completion status (if enrolled user)
+- [ ] GET `/api/courses/:courseId/lessons/:lessonId` — single lesson
+  - [ ] Return full content (if enrolled or instructor)
+  - [ ] Return quiz data if lesson has one
+- [ ] POST `/api/courses/:courseId/lessons` — create lesson (instructor/owner)
+  - [ ] Auto-assign order (append at end)
+  - [ ] Validate
+- [ ] PATCH `/api/courses/:courseId/lessons/:lessonId` — update lesson
+- [ ] DELETE `/api/courses/:courseId/lessons/:lessonId` — delete lesson
+- [ ] PATCH `/api/courses/:courseId/lessons/reorder` — reorder lessons
+  - [ ] Accept array of lesson IDs in new order
+  - [ ] Update all at once in a transaction
+- [ ] POST `/api/courses/:courseId/lessons/:lessonId/progress` — mark lesson complete
+  - [ ] Verify user is enrolled
+  - [ ] Upsert LessonProgress record
+  - [ ] Recalculate course progress (%)
+
+## 7. Enrollments API
+
+- [ ] POST `/api/courses/:courseId/enroll` — enroll user
+  - [ ] Check if already enrolled (return 409)
+  - [ ] Create Enrollment record
+  - [ ] Handle free courses (immediate)
+  - [ ] Handle paid courses (check payment status)
+- [ ] GET `/api/enrollments/mine` — current user's enrollments
+  - [ ] Include course details
+  - [ ] Include progress percentage
+  - [ ] Filter by status (in-progress / completed)
+- [ ] GET `/api/courses/:courseId/enrollments` — list enrollments (instructor)
+  - [ ] Paginated list of enrolled students
+- [ ] PATCH `/api/enrollments/:id/progress` — update progress manually (if needed)
+
+## 8. Progress Tracking
+
+- [ ] Calculate course progress endpoint: `GET /api/courses/:courseId/progress`
+  - [ ] % = (completed lessons / total lessons) * 100
+  - [ ] Cache result or compute on-demand
+- [ ] Auto-mark course completion
+  - [ ] When all lessons completed and quiz passed (if exists)
+  - [ ] Trigger certificate generation
+- [ ] Resume endpoint: `GET /api/courses/:courseId/resume`
+  - [ ] Return last incomplete lesson
+  - [ ] Return first uncompleted lesson
+- [ ] GET `/api/users/:id/stats` — public stats (streak, completed courses, total lessons)
+
+## 9. Quizzes & Assessments
+
+- [ ] GET `/api/lessons/:lessonId/quiz` — get quiz (if enrolled)
+  - [ ] Return questions WITHOUT correctAnswer revealed
+  - [ ] Shuffle question order? (option)
+- [ ] POST `/api/lessons/:lessonId/quiz/attempt` — submit quiz attempt
+  - [ ] Accept array of { questionId, answer }
+  - [ ] Auto-grade: compare answers, calculate score
+  - [ ] Record QuizAttempt
+  - [ ] Return score, correct/incorrect breakdown, explanations
+- [ ] GET `/api/lessons/:lessonId/quiz/attempts` — user's past attempts
+- [ ] Admin / Instructor quiz management
+  - [ ] POST `/api/lessons/:lessonId/quiz` — create quiz
+  - [ ] PATCH `/api/quizzes/:id` — update quiz
+  - [ ] DELETE `/api/quizzes/:id` — delete quiz
+  - [ ] POST `/api/quizzes/:id/questions` — add question
+  - [ ] PATCH `/api/questions/:id` — update question
+  - [ ] DELETE `/api/questions/:id` — delete question
+
+## 10. Certificates
+
+- [ ] Generate certificate PDF
+  - [ ] Use PDF generation library (pdf-lib, jsPDF, or puppeteer)
+  - [ ] Template: user name, course name, completion date, unique ID
+  - [ ] Store URL in Certificate model
+- [ ] POST `/api/courses/:courseId/certificate` — generate certificate
+  - [ ] Verify course fully completed
+  - [ ] Check if already exists (return existing)
+  - [ ] Generate PDF, upload to S3/R2
+  - [ ] Save URL
+- [ ] GET `/api/certificates/mine` — list user's certificates
+- [ ] GET `/api/certificates/verify/:id` — public verification page
+  - [ ] Return user name, course name, issue date
+  - [ ] Return valid/invalid status
+
+## 11. Reviews & Ratings
+
+- [ ] GET `/api/courses/:courseId/reviews` — list reviews (paginated)
+  - [ ] Sort by newest / highest rating
+  - [ ] Include user name and avatar
+- [ ] POST `/api/courses/:courseId/reviews` — create review
+  - [ ] Verify user is enrolled
+  - [ ] Validate rating (1–5) and optional text
+  - [ ] One review per user per course
+- [ ] PATCH `/api/reviews/:id` — update own review
+- [ ] DELETE `/api/reviews/:id` — delete own review
+- [ ] GET `/api/courses/:courseId/rating` — rating summary
+  - [ ] Average rating
+  - [ ] Rating distribution (count per star)
+  - [ ] Total review count
+
+## 12. File Uploads (Images & Video)
+
+- [ ] Set up file upload infrastructure
+  - [ ] Option A: Uploadthing (easiest for Next.js)
+  - [ ] Option B: AWS S3 / Cloudflare R2 + presigned URLs
+- [ ] POST `/api/upload/image` — upload course/avatar image
+  - [ ] Validate file type (jpg, png, webp)
+  - [ ] Validate size (max 5MB)
+  - [ ] Return URL
+- [ ] POST `/api/upload/video` — upload lesson video
+  - [ ] Validate file type (mp4, webm)
+  - [ ] Validate size (max 500MB)
+  - [ ] Return URL
+  - [ ] Consider video processing/transcoding queue (optional)
+
+## 13. Admin Endpoints
+
+- [ ] GET `/api/admin/stats` — platform-wide stats
+  - [ ] Total users (split by role)
+  - [ ] Total courses (published vs draft)
+  - [ ] Total enrollments
+  - [ ] Revenue (if applicable)
+- [ ] GET `/api/admin/courses` — list all courses (including drafts)
+- [ ] PATCH `/api/admin/courses/:id/feature` — feature/unfeature course
+- [ ] GET `/api/admin/reports/enrollments` — enrollment report (CSV export)
+- [ ] GET `/api/admin/reports/revenue` — revenue report (CSV export)
+
+## 14. Search & Filtering
+
+- [ ] Implement full-text search for courses
+  - [ ] PostgreSQL full-text search (tsvector)
+  - [ ] Or basic ILIKE on title + description
+- [ ] Category/tag filtering
+- [ ] Level filtering (BEGINNER / INTERMEDIATE / ADVANCED)
+- [ ] Price range filtering (free / paid / price range)
+- [ ] Sorting: newest, popular, top-rated
+
+## 15. Rate Limiting & Security
+
+- [ ] Implement rate limiting on auth endpoints (login, signup)
+  - [ ] Use upstash-rate-limiter or a simple in-memory map
+- [ ] Implement rate limiting on quiz submissions
+- [ ] Sanitize user input (XSS prevention)
+- [ ] Validate with Zod on all mutation endpoints
+- [ ] Set up CORS if backend is separate from frontend
+
+## 16. Testing
+
+- [ ] Set up testing framework (Vitest or Jest)
+- [ ] Write unit tests for utility functions
+  - [ ] Password hashing/comparison
+  - [ ] Slug generation
+  - [ ] Progress calculation
+  - [ ] Quiz grading logic
+- [ ] Write API integration tests
+  - [ ] Auth: signup, login, protected routes
+  - [ ] CRUD: courses, lessons, quizzes
+  - [ ] Enrollments: enroll, progress, certificates
+  - [ ] Error cases: validation, 403, 404, duplicate records
+- [ ] Write seed data test helper
+
+## 17. Documentation
+
+- [ ] Document all API routes in README or API docs
+  - [ ] Method, path, auth required, role required
+  - [ ] Request body schema (Zod or TypeScript types)
+  - [ ] Response shape
+- [ ] Add JSDoc / TSDoc comments to critical functions
+- [ ] Document environment variables needed
+
+## 18. Deployment Prep
+
+- [ ] Create production migration script
+- [ ] Add database indexing for common queries
+  - [ ] Index on Course.slug (unique)
+  - [ ] Index on Enrollment.userId + Enrollment.courseId
+  - [ ] Index on Lesson.courseId + Lesson.order
+  - [ ] Full-text search index (if using tsvector)
+- [ ] Set up connection pooling for production DB
+- [ ] Configure logging (pino or winston)
+- [ ] Set up error monitoring (Sentry)
